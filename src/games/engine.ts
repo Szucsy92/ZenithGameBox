@@ -100,7 +100,7 @@ export function dino(): Game {
       g.fillStyle = C.bg; g.fillRect(70, y - 46, 4, 4);
       g.fillStyle = C.green;
       for (const o of obs) { g.fillRect(o.x, GROUND - o.h, o.w, o.h); g.fillRect(o.x - 6, GROUND - o.h + 10, 6, 12); }
-      text(g, `SPEED ${Math.round(speed / 100)}`, W - 12, 30, C.gray, 12, "right");
+      text(g, `SPEED ${Math.round(speed / 100)}`, W - 12, 52, C.gray, 12, "right");
     },
     tap() { if (y >= GROUND) v = -640; },
     drag() {},
@@ -184,7 +184,7 @@ export function space(): Game {
       g.fillStyle = C.cyan; g.fillRect(sx - 16, H - 40, 32, 10); g.fillRect(sx - 4, H - 52, 8, 12);
       g.fillStyle = C.white; for (const s of shots) g.fillRect(s.x - 2, s.y, 4, 10);
       g.fillStyle = C.red; for (const b of bombs) g.fillRect(b.x - 3, b.y, 6, 10);
-      text(g, `WAVE ${wave}`, W - 12, 30, C.gray, 12, "right");
+      text(g, `WAVE ${wave}`, W - 12, 52, C.gray, 12, "right");
     },
     tap(x) { sx = Math.max(16, Math.min(W - 16, x)); },
     drag(x) { sx = Math.max(16, Math.min(W - 16, x)); },
