@@ -67,7 +67,7 @@ function Menu({ best, onPick }: { best: Record<string, number>; onPick: (i: numb
 }
 
 function Player({ index, onExit }: { index: number; onExit: () => void }) {
-  const def = GAMES[index];
+  const def = GAMES[index]!;
   const ref = useRef<HTMLCanvasElement>(null);
   const game = useRef<Game | null>(null);
   const [state, setState] = useState<"ready" | "play" | "over">("ready");

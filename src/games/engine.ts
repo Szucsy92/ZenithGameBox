@@ -56,7 +56,7 @@ export function bird(): Game {
         if (!p.passed && p.x + 40 < 70) { p.passed = true; this.score++; }
         if (hit(70, y, 24, 18, p.x, 0, 40, p.gap) || hit(70, y, 24, 18, p.x, p.gap + GAP, 40, H)) this.over = true;
       }
-      while (pipes.length && pipes[0].x < -50) pipes.shift();
+      while (pipes.length && pipes[0]!.x < -50) pipes.shift();
       if (y > H - 18 || y < 0) this.over = true;
     },
     draw(g) {
@@ -91,7 +91,7 @@ export function dino(): Game {
         if (!o.passed && o.x + o.w < 40) { o.passed = true; this.score++; if (this.score % 5 === 0) speed = Math.min(420, speed + 30); }
         if (hit(44, y - 40, 26, 40, o.x, GROUND - o.h, o.w, o.h)) this.over = true;
       }
-      while (obs.length && obs[0].x < -40) obs.shift();
+      while (obs.length && obs[0]!.x < -40) obs.shift();
     },
     draw(g) {
       clear(g);
@@ -162,7 +162,7 @@ export function space(): Game {
       let edge = false;
       for (const e of alive) { e.x += dir * sp * dt; if (e.x < 10 || e.x > W - 34) edge = true; }
       if (edge) { dir = -dir; for (const e of alive) e.y += 14; }
-      if (Math.random() < dt * (0.8 + wave * 0.3) && alive.length) { const e = alive[Math.floor(Math.random() * alive.length)]; bombs.push({ x: e.x + 12, y: e.y + 20 }); }
+      if (Math.random() < dt * (0.8 + wave * 0.3) && alive.length) { const e = alive[Math.floor(Math.random() * alive.length)]!; bombs.push({ x: e.x + 12, y: e.y + 20 }); }
       for (const s of shots) s.y -= 420 * dt;
       for (const b of bombs) b.y += 200 * dt;
       for (const s of shots) for (const e of alive) if (e.alive && hit(s.x - 2, s.y, 4, 10, e.x, e.y, 26, 20)) { e.alive = false; s.y = -99; this.score++; }
@@ -177,7 +177,7 @@ export function space(): Game {
       const cols = [C.red, C.yellow, C.green, C.blue];
       enemies.forEach((e, i) => {
         if (!e.alive) return;
-        g.fillStyle = cols[Math.floor(i / 7)];
+        g.fillStyle = cols[Math.floor(i / 7)]!;
         g.fillRect(e.x + 4, e.y, 18, 14); g.fillRect(e.x, e.y + 6, 26, 6); g.fillRect(e.x + 2, e.y + 14, 4, 6); g.fillRect(e.x + 20, e.y + 14, 4, 6);
         g.fillStyle = C.bg; g.fillRect(e.x + 8, e.y + 4, 3, 3); g.fillRect(e.x + 15, e.y + 4, 3, 3);
       });
@@ -219,7 +219,7 @@ export function jump(): Game {
         for (const p of plats) p.y += d;
         this.score = Math.floor(height / 20);
       }
-      while (plats.length && plats[0].y > H) plats.shift();
+      while (plats.length && plats[0]!.y > H) plats.shift();
       let top = Math.min(...plats.map((p) => p.y));
       while (top > -40) { top -= rand(55, 85 + Math.min(40, this.score / 10)); plats.push(make(top)); }
       plats.sort((a, b) => b.y - a.y);
