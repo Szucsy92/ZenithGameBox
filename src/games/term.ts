@@ -96,10 +96,6 @@ function drawBlock(ctx: CanvasRenderingContext2D, ch: string, x: number, y: numb
 // Double-line corner: which arms (left, right, up, down) exist.
 function dbl(ctx: CanvasRenderingContext2D, x: number, y: number, L: boolean, R: boolean, U: boolean, D: boolean) {
   const cx = x + CW / 2, cy = y + CH / 2, m = 2;
-  for (const o of [-4, 2]) {
-    const inner = (L ? o === 2 : o === -4) === (U ? o === 2 : o === -4); // outer/inner line pairing
-    void inner;
-  }
   // outer line
   const ox = R ? cx - 4 : cx + 2, oy = D ? cy - 4 : cy + 2;
   const ix = R ? cx + 2 : cx - 4, iy = D ? cy + 2 : cy - 4;

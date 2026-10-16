@@ -19,7 +19,7 @@
  */
 
 @theme inline {
-  --font-pixel: "Silkscreen", monospace;
+  --font-term: "DejaVu Sans Mono", Menlo, Consolas, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -64,7 +64,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.12 0.03 295);
+  --background: oklch(0.08 0.01 295);
   --foreground: oklch(0.96 0.02 300);
   --card: oklch(0.17 0.04 295);
   --card-foreground: oklch(0.96 0.02 300);
