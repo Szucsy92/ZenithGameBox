@@ -15,8 +15,8 @@ export function space({ best, opts }: GameOpts): TermGame {
   const W = 56, H = 19;
   const BG = "#0e011c", BORDER = "#af87ff", GLOW = "#d787ff", WHITE = "#e5e5e5", PURPLE = "#af87ff";
   const YELLOW = "#ffff00", RED = "#ff0000", HUD = "#ffd7ff";
-  const bulletC = SPACE_BULLETS.find((b) => b.label === opts.bullet)?.c ?? YELLOW;
-  const ship = opts.ship || SPACE_SHIPS[0]!;
+  const bulletC = SPACE_BULLETS.find((b) => b.label === opts['bullet'])?.c ?? YELLOW;
+  const ship = opts['ship'] || SPACE_SHIPS[0]!;
 
   let px = 24;
   const bullets = Array.from({ length: 6 }, () => ({ a: false, x: 0, y: 0 }));

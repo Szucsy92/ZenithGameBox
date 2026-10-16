@@ -7,7 +7,7 @@ export function jump({ best, opts }: GameOpts): TermGame {
   const W = 58, H = 19;
   const BG = "#262626", BORDER = "#af87ff", GLOW = "#d787ff", HUD = "#ffd7ff", WHITE = "#e5e5e5";
   const CYAN = "#00afff", YELLOW = "#ffff00", GREEN = "#00ff00", PURPLE = "#af5fff";
-  const player = JUMP_SKINS[Number(opts.skin || 1) - 1] ?? GREEN;
+  const player = JUMP_SKINS[Number(opts['skin'] || 1) - 1] ?? GREEN;
 
   let px = Math.floor(W / 2), py = H - 3, vx = 0, vy = JP, gravTick = 0, platTick = 0;
   let groundY = H - 1, ground = true, push = 0;

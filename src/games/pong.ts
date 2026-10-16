@@ -9,8 +9,8 @@ export function pong({ best, opts }: GameOpts): TermGame {
   const SPEED_START = 75, SPEED_ACCEL = 10, LEVEL_GAP = 10, MAX_LEVEL = 10, WALL_LIFE = 9;
   const BLK = { 1: "#ff00ff", 2: "#00afff", 3: "#ffff00", 4: "#00ff00", 5: "#ff0000" } as Record<number, string>;
   const BASE_PW = 16, PADDLE_Y = H, JUMPX = 6;
-  const ball = opts.ball || PONG_BALLS[0]!;
-  const pad = opts.pad || PONG_PADS[0]!;
+  const ball = opts['ball'] || PONG_BALLS[0]!;
+  const pad = opts['pad'] || PONG_PADS[0]!;
 
   let PW = BASE_PW, PX = Math.floor(W / 2 - PW / 2);
   let speedOffset = 0, yellowEnd = 0, greenEnd = 0, redEnd = 0, timer = 0;
@@ -90,9 +90,9 @@ export function pong({ best, opts }: GameOpts): TermGame {
       const t = now();
       const bar = Array.from({ length: MAX_LEVEL }, (_, i) => (i < level ? "█" : "░")).join("");
       const s: { t: string; c?: string }[] = [{ t: ` BEST:${Math.max(best, this.score)} | SCORE:${this.score} | LVL:${level}/${MAX_LEVEL} [${bar}]`, c: HUD }];
-      if (t < yellowEnd) s.push({ t: `  SHIELD:${Math.ceil(yellowEnd - t)}s`, c: BLK[3] });
-      if (t < greenEnd) s.push({ t: `  WIDE:${Math.ceil(greenEnd - t)}s`, c: BLK[4] });
-      if (t < redEnd) s.push({ t: `  NARROW:${Math.ceil(redEnd - t)}s`, c: BLK[5] });
+      if (t < yellowEnd) s.push({ t: `  SHIELD:${Math.ceil(yellowEnd - t)}s`, c: BLK[3]! });
+      if (t < greenEnd) s.push({ t: `  WIDE:${Math.ceil(greenEnd - t)}s`, c: BLK[4]! });
+      if (t < redEnd) s.push({ t: `  NARROW:${Math.ceil(redEnd - t)}s`, c: BLK[5]! });
       return s;
     },
   };
