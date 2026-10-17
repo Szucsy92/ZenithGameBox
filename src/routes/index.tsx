@@ -1,15 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { GAMES, type GameDef } from "@/games/engine";
 import { CH, CW, Grid, renderGrid, type Seg, type TermGame } from "@/games/term";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Zenith Games – retro terminál játékkonzol" },
+      { title: "Zenith Games – retro játékkonzol" },
       { name: "description", content: "Zenith Bird, Dino, Pong, Space és Jump eredeti terminál grafikával, koppintással és húzással." },
-      { property: "og:title", content: "Zenith Games – retro terminál játékkonzol" },
-      { property: "og:description", content: "Öt terminál-játék eredeti shell grafikával, érintéses irányítással." },
+      { property: "og:title", content: "Zenith Games – retro játékkonzol" },
+      { property: "og:description", content: "Öt retro játék eredeti figurákkal és funkciókkal, Game Boy-os konzolon." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -20,63 +21,24 @@ export const Route = createFileRoute("/")({
 const hsKey = (id: string) => `zenith_${id}_hs`;
 const optKey = (id: string, k: string) => `zenith_${id}_${k}`;
 
-const P = "#af87ff", G = "#00ff00", B = "#00afff", Y = "#ffff00", R = "#ff0000", Wt = "#ffffff", C = "#00ffff";
-type Span = [string, string?];
-const consoleArt = (o: string): Span[][] => [
-  [["                ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄", o]],
-  [["           ▄▄▀▀▀                        ▀▀▀▄▄", o]],
-  [["        ▄▀▀", o], ["   "], ["▲", G], ["         "], ["▰  ▰", Wt], ["         "], ["●", Y], ["      "], ["▀▀▄", o]],
-  [["      ▄▀", o], ["    "], ["◀   ▶", G], ["                  "], ["●", R], ["   "], ["●", B], ["    "], ["▀▄", o]],
-  [["    ▄▀", o], ["        "], ["▼", G], ["                      "], ["●", G], ["            "], ["▀▄", o]],
-  [["   █", o], ["          "], ["◉", C], ["                      "], ["◉", C], ["          "], ["█", o]],
-  [["    ▀▄", o], ["          "], ["▄▀▀", o], ["                      "], ["▀▀▄", o], ["           "], ["▀▄", o]],
-  [["      ▀▄", o], ["      "], ["▄▀", o], ["                            "], ["▀▄", o], ["     "], ["▄▀", o]],
-  [["        ▀▄▄▄▄▀", o], ["                                "], ["▀▄▄▄▄▀", o]],
-];
-
-function Art({ outline }: { outline: string }) {
-  return (
-    <pre className="overflow-hidden text-[2.4vw] leading-tight sm:text-sm">
-      {consoleArt(outline).map((line, i) => (
-        <div key={i}>
-          {line.map(([t, c], j) => (
-            <span key={j} style={{ color: c }}>{t}</span>
-          ))}
-        </div>
-      ))}
-    </pre>
-  );
-}
-
 function Index() {
-  const [screen, setScreen] = useState<"boot" | "menu" | number>("boot");
+  const [selected, setSelected] = useState<number | null>(null);
+  const def = selected === null ? undefined : GAMES[selected];
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-2 py-6 font-term text-foreground">
-      <div className="w-full max-w-[760px]">
-        {screen === "boot" && <Boot onDone={() => setScreen("menu")} />}
-        {screen === "menu" && <Menu onPick={(i) => setScreen(i)} />}
-        {typeof screen === "number" && <Player key={screen} def={GAMES[screen]!} onExit={() => setScreen("menu")} />}
+    <main className="console-page font-term">
+      <h1 className="console-title">ZENITH GAMES</h1>
+      <div className="handheld">
+        <div className="handheld-screen">
+          {def ? <Player key={def.id} def={def} onExit={() => setSelected(null)} /> : <Menu onPick={setSelected} />}
+        </div>
+        <div className="handheld-controls" aria-hidden="true">
+          <span className="handheld-dpad">▲<br />◀ ✚ ▶<br />▼</span>
+          <span className="handheld-select">▰ ▰</span>
+          <span className="handheld-buttons">● ● ●</span>
+        </div>
       </div>
+      <p className="console-motto">Life is a game...</p>
     </main>
-  );
-}
-
-function Boot({ onDone }: { onDone: () => void }) {
-  const [frame, setFrame] = useState(0);
-  const [typed, setTyped] = useState("");
-  useEffect(() => {
-    const msg = "Life is a game...";
-    const timers: number[] = [];
-    [0, 1, 2].forEach((f) => timers.push(window.setTimeout(() => setFrame(f), f * 120)));
-    for (let i = 1; i <= msg.length; i++) timers.push(window.setTimeout(() => setTyped(msg.slice(0, i)), 400 + i * 45));
-    timers.push(window.setTimeout(onDone, 400 + msg.length * 45 + 700));
-    return () => timers.forEach(clearTimeout);
-  }, [onDone]);
-  return (
-    <button onClick={onDone} className="block w-full text-left">
-      <Art outline={frame === 1 ? R : P} />
-      <p className="mt-6 pl-[18%] text-lg" style={{ color: Y }}>{typed}</p>
-    </button>
   );
 }
 
@@ -88,19 +50,13 @@ function Menu({ onPick }: { onPick: (i: number) => void }) {
     setBest(b);
   }, []);
   return (
-    <div className="mx-auto max-w-md">
-      <div style={{ color: P }}>{"═".repeat(30)}</div>
-      <div className="py-1 text-lg" style={{ color: P }}>  ZENITH GAMES 🎮</div>
-      <div style={{ color: P }}>{"═".repeat(30)}</div>
-      <div className="mt-4 flex flex-col gap-1">
-        {GAMES.map((g, i) => (
-          <button key={g.id} onClick={() => onPick(i)} className="flex justify-between rounded px-2 py-3 text-left text-lg hover:bg-secondary active:bg-secondary">
-            <span><span style={{ color: g.color }}>{i + 1})</span> {g.name}</span>
-            <span style={{ color: Y }}>[BEST: {best[g.id] ?? 0}]</span>
-          </button>
-        ))}
-      </div>
-      <p className="mt-6 text-sm text-muted-foreground">Koppints egy játékra a kezdéshez.</p>
+    <div className="game-menu">
+      {GAMES.map((g, i) => (
+        <Button key={g.id} variant="outline" onClick={() => onPick(i)} className={`game-menu-item game-ink-${g.id}`}>
+          <span>{i + 1}) {g.name.replace("ZENITH ", "")}</span>
+          <span className="game-best">BEST {best[g.id] ?? 0}</span>
+        </Button>
+      ))}
     </div>
   );
 }
@@ -118,7 +74,7 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
 
   useEffect(() => {
     const o: Record<string, string> = {};
-    def.options.forEach((d) => (o[d.key] = localStorage.getItem(optKey(def.id, d.key)) || d.choices[0]!.value));
+    def.options.forEach((d) => (o[d.key] = localStorage.getItem(optKey(def.id, d.key)) || d.choices[0]?.value ?? ""));
     setOpts(o);
   }, [def]);
 
@@ -128,9 +84,13 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
     const gm = def.make({ best, opts });
     game.current = gm;
     grid.current = new Grid(gm.W + 2, gm.H + 2);
-    const ctx = ref.current!.getContext("2d")!;
-    ref.current!.width = (gm.W + 2) * CW;
-    ref.current!.height = (gm.H + 2) * CH;
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    canvas.width = (gm.W + 2) * CW;
+    canvas.height = (gm.H + 2) * CH;
+    const cells = grid.current;
     let raf = 0, acc = 0, last = performance.now(), overAt = 0;
     const loop = (t: number) => {
       acc += Math.min(200, t - last);
@@ -143,8 +103,8 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
           if (gm.score > best) localStorage.setItem(hsKey(def.id), String(gm.score));
         } else if (t - overAt > 800) setPhase("over");
       }
-      gm.draw(grid.current!);
-      renderGrid(ctx, grid.current!);
+      gm.draw(cells);
+      renderGrid(ctx, cells);
       setHud(gm.hud());
       raf = requestAnimationFrame(loop);
     };
@@ -154,14 +114,18 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
 
   const lastX = useRef<number | null>(null);
   const colOf = (e: React.PointerEvent) => {
-    const r = ref.current!.getBoundingClientRect();
-    const cols = game.current!.W + 2;
+    const r = ref.current?.getBoundingClientRect();
+    const gm = game.current;
+    if (!r || !gm) return { col: 0, side: 1 as const };
+    const cols = gm.W + 2;
     return { col: ((e.clientX - r.left) / r.width) * cols - 1, side: (e.clientX - r.left < r.width / 2 ? -1 : 1) as -1 | 1 };
   };
   const down = (e: React.PointerEvent) => {
     e.preventDefault();
-    const gm = game.current!;
-    if (phase === "over") { setPhase("play"); setRun((n) => n + 1); return; }
+    const gm = game.current;
+    if (!gm) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    if (phase === "over") { setPhase("setup"); setRun((n) => n + 1); return; }
     if (phase === "setup") { setPhase("play"); gm.start(); return; }
     const { col, side } = colOf(e);
     lastX.current = col;
@@ -171,7 +135,7 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
     if (phase !== "play" || lastX.current === null) return;
     const { col } = colOf(e);
     const dx = col - lastX.current;
-    if (Math.abs(dx) >= 1) { game.current!.drag(dx); lastX.current = col; }
+    if (Math.abs(dx) >= 1) { game.current?.drag(dx); lastX.current = col; }
   };
   const up = () => { lastX.current = null; };
 
@@ -181,9 +145,11 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
   };
 
   return (
-    <div className="select-none">
+    <div className="game-player select-none">
+      <div className={`game-player-title game-ink-${def.id}`}>{def.name}</div>
       <canvas
         ref={ref}
+        aria-label={def.name}
         onPointerDown={down}
         onPointerMove={move}
         onPointerUp={up}
@@ -191,31 +157,33 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
         onPointerLeave={up}
         className="block w-full touch-none [image-rendering:pixelated]"
       />
-      <div className="min-h-6 bg-background py-1 text-xs sm:text-sm">
+      <div className="min-h-6 bg-background px-2 py-2 text-[10px] sm:text-xs">
         {hud.map((s, i) => <span key={i} style={{ color: s.c }}>{s.t}</span>)}
       </div>
       {phase === "setup" && def.options.length > 0 && (
-        <div className="mt-2 flex flex-col gap-2 text-sm">
+        <div className="px-3 pt-2 flex flex-col gap-2 text-xs">
           {def.options.map((d) => (
             <div key={d.key} className="flex flex-wrap items-center gap-2">
-              <span className="w-24 text-muted-foreground">{d.label}:</span>
+              <span className="w-16 text-muted-foreground">{d.label}:</span>
               {d.choices.map((c) => (
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   key={c.value}
                   onClick={() => setOpt(d.key, c.value)}
                   className={`rounded border-2 px-2 py-1 ${opts[d.key] === c.value ? "border-primary" : "border-border"}`}
                   style={{ color: c.color }}
                 >
                   {c.label}
-                </button>
+                </Button>
               ))}
             </div>
           ))}
         </div>
       )}
-      <div className="mt-3 flex items-center gap-4 text-sm">
-        {phase === "over" && <span>RETRY? (Tap) / </span>}
-        <button onClick={onExit} className="rounded border-2 border-border px-3 py-1 hover:border-primary">EXIT</button>
+      <div className="mt-auto flex items-center gap-3 px-3 py-3 text-xs">
+        {phase === "over" && <span className="text-muted-foreground">GAME OVER</span>}
+        <Button variant="outline" size="sm" onClick={onExit}>◀ MENÜ</Button>
       </div>
     </div>
   );
