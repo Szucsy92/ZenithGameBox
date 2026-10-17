@@ -1,6 +1,6 @@
 // Terminal-cell renderer that reproduces the original shell (ANSI) graphics on a canvas.
 
-export type Cell = { ch: string; fg: string; bg: string; wide?: boolean };
+export type Cell = { ch: string; fg: string; bg: string; wide?: boolean; ox?: number; oy?: number };
 export type Seg = { t: string; c?: string };
 
 export class Grid {
@@ -11,19 +11,22 @@ export class Grid {
     );
   }
   fill(bg: string) {
-    for (const r of this.cells) for (const c of r) { c.ch = " "; c.bg = bg; c.wide = false; }
+    for (const r of this.cells) for (const c of r) { c.ch = " "; c.bg = bg; c.wide = false; c.ox = 0; c.oy = 0; }
   }
   /** Write text at grid x,y. Emoji/wide glyphs take two cells. */
   put(x: number, y: number, str: string, fg: string, bg?: string, minX = 0, maxX = this.cols - 1) {
+    const ox = x - Math.round(x), oy = y - Math.round(y);
+    x = Math.round(x); y = Math.round(y);
     const row = this.cells[y];
     if (!row) return;
     for (const ch of Array.from(str)) {
       const wide = isWide(ch);
       if (x >= minX && x <= maxX) {
-        const cell = row[x]!;
-        cell.ch = ch; cell.fg = fg; cell.wide = wide;
+        const cell = row[x];
+        if (!cell) continue;
+        cell.ch = ch; cell.fg = fg; cell.wide = wide; cell.ox = ox; cell.oy = oy;
         if (bg) cell.bg = bg;
-        if (wide && x + 1 <= maxX) { const n = row[x + 1]!; n.ch = ""; n.wide = false; if (bg) n.bg = bg; }
+        if (wide && x + 1 <= maxX) { const n = row[x + 1]; if (n) { n.ch = ""; n.wide = false; if (bg) n.bg = bg; } }
       }
       x += wide ? 2 : 1;
     }
@@ -52,12 +55,17 @@ export const CH = 24;
 export function renderGrid(ctx: CanvasRenderingContext2D, g: Grid) {
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
+  for (let y = 0; y < g.rows; y++) for (let x = 0; x < g.cols; x++) {
+    const cell = g.cells[y]?.[x];
+    if (!cell) continue;
+    ctx.fillStyle = cell.bg;
+    ctx.fillRect(x * CW, y * CH, CW + 0.5, CH + 0.5);
+  }
   for (let y = 0; y < g.rows; y++) {
     for (let x = 0; x < g.cols; x++) {
-      const c = g.cells[y]![x]!;
-      const px = x * CW, py = y * CH;
-      ctx.fillStyle = c.bg;
-      ctx.fillRect(px, py, CW + 0.5, CH + 0.5);
+      const c = g.cells[y]?.[x];
+      if (!c) continue;
+      const px = (x + (c.ox ?? 0)) * CW, py = (y + (c.oy ?? 0)) * CH;
       if (!c.ch || c.ch === " ") continue;
       ctx.fillStyle = c.fg;
       if (drawBlock(ctx, c.ch, px, py)) continue;

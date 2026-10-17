@@ -1,25 +1,25 @@
 import { rnd, type GameOpts, type Grid, type TermGame } from "./term";
 
 export function dino({ best }: GameOpts): TermGame {
-  const W = 58, H = 19, GROUND = H - 2, DINO_X = 8, JUMP = -4, MAX_FALL = 2;
+  const W = 58, H = 19, GROUND = H - 2, DINO_X = 8, JUMP = -0.65, MAX_FALL = 0.6;
   const BG = "#eeeeee", BORDER = "#585858", CLOUD = "#bcbcbc";
   const clouds = [[4, 1], [27, 5], [50, 3]] as const;
-  let dinoY = GROUND, vel = 0, cactusX = W, cactusH = 3, speed = 2, jump = false;
+  let dinoY = GROUND, vel = 0, cactusX = W, cactusH = 3, speed = 0.4, jump = false;
   return {
     W, H, started: false, over: false, score: 0,
-    delay() { return Math.max(25, 35 - Math.floor(this.score / 4)); },
+    delay() { return 16; },
     start() { this.started = true; vel = JUMP; },
     tap() { jump = true; },
     drag() {},
     tick() {
       if (!this.started || this.over) return;
       if (jump) { if (dinoY >= GROUND) vel = JUMP; jump = false; }
-      vel = Math.min(MAX_FALL, vel + 1);
+      vel = Math.min(MAX_FALL, vel + 0.026);
       dinoY = Math.min(GROUND, dinoY + vel);
       cactusX -= speed;
       if (cactusX < -3) {
         cactusX = W; cactusH = rnd(2) + 2; this.score++;
-        if (this.score % 5 === 0 && speed < 5) speed++;
+        if (this.score % 5 === 0) speed = Math.min(0.9, speed + 0.075);
       }
       if (DINO_X + 4 >= cactusX && DINO_X <= cactusX + 2 && dinoY >= GROUND - cactusH + 1) this.over = true;
     },
@@ -35,7 +35,7 @@ export function dino({ best }: GameOpts): TermGame {
       if (this.over) g.center(Math.floor(H / 2), " GAME OVER ", "#000000", W);
     },
     hud() {
-      return [{ t: ` HI: ${Math.max(best, this.score)} | SCORE: ${this.score} | SPEED: ${speed} `, c: "#ffffff" }];
+      return [{ t: ` HI: ${Math.max(best, this.score)} | SCORE: ${this.score} | SPEED: ${Math.round(speed / 0.4 * 10) / 10} `, c: "#ffffff" }];
     },
   };
 }

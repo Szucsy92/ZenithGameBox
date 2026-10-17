@@ -3,14 +3,14 @@ import { rnd, type GameOpts, type Grid, type TermGame } from "./term";
 export const JUMP_SKINS = ["#00ff00", "#ff5f00", "#ffff00", "#af5fff"];
 
 export function jump({ best, opts }: GameOpts): TermGame {
-  const PUSH = 3, FRICTION = 1, JP = -3, MAX_FALL = 2, GRAV_DELAY = 3, YELLOW_PROB = 6, PURPLE_PROB = 15;
+  const JP = -0.65, MAX_FALL = 0.65, YELLOW_PROB = 6, PURPLE_PROB = 15;
   const W = 58, H = 19;
   const BG = "#262626", BORDER = "#af87ff", GLOW = "#d787ff", HUD = "#ffd7ff", WHITE = "#e5e5e5";
   const CYAN = "#00afff", YELLOW = "#ffff00", GREEN = "#00ff00", PURPLE = "#af5fff";
   const player = JUMP_SKINS[Number(opts['skin'] || 1) - 1] ?? GREEN;
 
-  let px = Math.floor(W / 2), py = H - 3, vx = 0, vy = JP, gravTick = 0, platTick = 0;
-  let groundY = H - 1, ground = true, push = 0;
+  let px = Math.floor(W / 2), py = H - 3, vy = JP, target = px;
+  let groundY = H - 1, ground = true;
   const pl = [
     { x: 6, y: 14, a: true, d: 1, max: -1, b: -1 },
     { x: 22, y: 10, a: true, d: -1, max: -1, b: -1 },
@@ -20,19 +20,14 @@ export function jump({ best, opts }: GameOpts): TermGame {
 
   return {
     W, H, started: false, over: false, score: 0,
-    delay: () => 30,
+    delay: () => 16,
     start() { this.started = true; },
-    tap(_c, side) { push = side; },
-    drag(dx) { if (Math.abs(dx) >= 1) push = dx < 0 ? -1 : 1; },
+    tap(col) { target = Math.max(3, Math.min(W - 3, col)); },
+    drag(dx) { target = Math.max(3, Math.min(W - 3, target + dx)); },
     tick() {
       if (!this.started || this.over) return;
-      if (push) { vx = push * PUSH; push = 0; }
-      px += vx;
-      if (px < 3) { px = 3; vx = 0; }
-      if (px > W - 3) { px = W - 3; vx = 0; }
-      if (vx > 0) vx -= FRICTION;
-      if (vx < 0) vx += FRICTION;
-      if (++gravTick >= GRAV_DELAY) { vy = Math.min(MAX_FALL, vy + 1); gravTick = 0; }
+      px += (target - px) * 0.16;
+      vy = Math.min(MAX_FALL, vy + 0.026);
       py += vy;
       if (vy > 0) {
         if (ground && py >= groundY) { py = groundY; vy = JP; }
@@ -45,13 +40,10 @@ export function jump({ best, opts }: GameOpts): TermGame {
           }
         }
       }
-      if (++platTick >= 3) {
-        platTick = 0;
-        for (const p of pl) if (p.a && p.d) {
-          p.x += p.d;
-          if (p.x < 2) { p.x = 2; p.d = 1; }
-          if (p.x > W - 11) { p.x = W - 11; p.d = -1; }
-        }
+      for (const p of pl) if (p.a && p.d) {
+        p.x += p.d * 0.09;
+        if (p.x < 2) { p.x = 2; p.d = 1; }
+        if (p.x > W - 11) { p.x = W - 11; p.d = -1; }
       }
       if (py < 7) {
         const shift = 7 - py; py = 7; this.score += shift;
@@ -78,19 +70,14 @@ export function jump({ best, opts }: GameOpts): TermGame {
         return;
       }
       if (this.over) { g.center(Math.floor(H / 2), " GAME OVER ", WHITE, W); }
-      for (let y = 1; y <= H; y++) {
-        if (this.over && y === Math.floor(H / 2)) continue;
-        if (ground && y === groundY) g.inner(0, y, "█".repeat(W), GREEN);
-        else {
-          const p = pl.find((q) => q.a && q.y === y);
-          if (p) g.inner(p.x - 1, y, "█".repeat(10), p.max === -2 ? PURPLE : p.max !== -1 ? YELLOW : CYAN);
-        }
-        if (y === py - 1) g.inner(px - 3, y, "▓▀█▀▓", player);
-        else if (y === py) g.inner(px - 3, y, "▓███▓", player);
-      }
+      if (ground) g.inner(0, groundY, "█".repeat(W), GREEN);
+      for (const p of pl) if (p.a) g.inner(p.x - 1, p.y, "█".repeat(10), p.max === -2 ? PURPLE : p.max !== -1 ? YELLOW : CYAN);
+      g.inner(px - 3, py - 1, "▓▀█▀▓", player);
+      g.inner(px - 3, py, "▓███▓", player);
+      if (this.over) g.center(Math.floor(H / 2), " GAME OVER ", WHITE, W);
     },
     hud() {
-      return [{ t: ` BEST:${Math.max(best, this.score)} | SCORE:${this.score}m | ZONE: ${this.score}m`, c: HUD }];
+      return [{ t: ` BEST:${Math.max(best, Math.floor(this.score))} | SCORE:${Math.floor(this.score)}m | ZONE: ${Math.floor(this.score)}m`, c: HUD }];
     },
   };
 }
