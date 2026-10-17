@@ -74,7 +74,7 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
 
   useEffect(() => {
     const o: Record<string, string> = {};
-    def.options.forEach((d) => (o[d.key] = localStorage.getItem(optKey(def.id, d.key)) || d.choices[0]?.value ?? ""));
+    def.options.forEach((d) => (o[d.key] = localStorage.getItem(optKey(def.id, d.key)) || d.choices[0]?.value || ""));
     setOpts(o);
   }, [def]);
 
