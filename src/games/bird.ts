@@ -4,20 +4,20 @@ const YELLOW = "#ffff00", RED = "#ff0000", WHITE = "#ffffff", ORANGE = "#ff5f00"
 const LIGHT_GREEN = "#55ff55", CYAN = "#00ffff";
 
 export function bird({ best }: GameOpts): TermGame {
-  const W = 58, H = 19, GAP = 6, BIRD_X = 10, FLAP = -3;
+  const W = 58, H = 19, GAP = 6, BIRD_X = 10, FLAP = -0.5;
   let birdY = Math.floor(H / 2), vel = 0, pipeX = W, gapY = 4, flap = false;
   return {
     W, H, started: false, over: false, score: 0,
-    delay() { return Math.max(20, 40 - this.score * 0.5); },
+    delay() { return 16; },
     start() { this.started = true; vel = FLAP; },
     tap() { flap = true; },
     drag() {},
     tick() {
       if (!this.started || this.over) return;
       if (flap) { vel = FLAP; flap = false; }
-      vel = Math.min(1, vel + 1);
+      vel = Math.min(0.48, vel + 0.026);
       birdY += vel;
-      pipeX -= Math.min(6, 2 + Math.floor(this.score / 10));
+      pipeX -= Math.min(0.7, 0.28 + this.score * 0.014);
       if (pipeX < 1) { pipeX = W; gapY = rnd(H - GAP - 2) + 2; this.score++; }
       if (birdY < 1) { birdY = 1; this.over = true; }
       if (birdY > H) { birdY = H; this.over = true; }
