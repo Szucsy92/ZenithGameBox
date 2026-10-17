@@ -82,6 +82,7 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
   useEffect(() => {
     const best = Number(localStorage.getItem(hsKey(def.id)) || 0);
     const gm = def.make({ best, opts });
+    if (phaseRef.current === "play") gm.start();
     game.current = gm;
     grid.current = new Grid(gm.W + 2, gm.H + 2);
     const canvas = ref.current;
@@ -125,7 +126,7 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
     const gm = game.current;
     if (!gm) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    if (phase === "over") { setPhase("setup"); setRun((n) => n + 1); return; }
+    if (phase === "over") { setPhase("play"); setRun((n) => n + 1); return; }
     if (phase === "setup") { setPhase("play"); gm.start(); return; }
     const { col, side } = colOf(e);
     lastX.current = col;
