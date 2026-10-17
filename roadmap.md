@@ -1,0 +1,3 @@
+- [ ] Smooth the physics of all five games while preserving original mechanics.
+- [ ] Apply minimal sub-cell graphical smoothing without changing the console.
+- [ ] Test movement, collisions, and touch gameplay.
