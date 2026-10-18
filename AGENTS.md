@@ -11,3 +11,4 @@
 
 - Keep the handheld console presentation in the index route separate from the terminal game modules, so visual framing changes preserve game graphics and mechanics.
 - Keep touch-button pointer capture in the shared console controls and adapt pixel drags to game columns in the player, so both hands use the same game input methods.
+- Keep launch artwork as imported presentation assets in the index route and derive browser/touch icons from the same app mark, so branding stays consistent without touching game modules.
