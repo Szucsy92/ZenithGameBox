@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ConsoleControls } from "@/components/console-controls";
 import { GAMES, type GameDef } from "@/games/engine";
 import { CH, CW, Grid, renderGrid, type Seg, type TermGame } from "@/games/term";
+import consoleIcon from "@/assets/zenith-icon.jpg";
+import startArtwork from "@/assets/zenith-start.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,7 +29,7 @@ function Index() {
   const def = selected === null ? undefined : GAMES[selected];
   return (
     <main className="console-page font-term">
-      <h1 className="console-title">ZENITH GAMES</h1>
+      <h1 className="console-title"><img src={consoleIcon} alt="" width={36} height={36} />ZENITH GAMES</h1>
       <div className="handheld">
         {def ? <Player key={def.id} def={def} onExit={() => setSelected(null)} /> : <>
           <div className="handheld-screen"><Menu onPick={setSelected} /></div>
@@ -48,6 +50,7 @@ function Menu({ onPick }: { onPick: (i: number) => void }) {
   }, []);
   return (
     <div className="game-menu">
+      <img className="game-menu-artwork" src={startArtwork} alt="" width={768} height={1024} aria-hidden="true" />
       {GAMES.map((g, i) => (
         <Button key={g.id} variant="outline" onClick={() => onPick(i)} className={`game-menu-item game-ink-${g.id}`}>
           <span>{i + 1}) {g.name.replace("ZENITH ", "")}</span>
