@@ -63,6 +63,8 @@
 }
 
 :root {
+  --control-glow: 0 0 22px 3px var(--primary);
+  --control-glow-faded: 0 0 4px 0 var(--border);
   --console-shadow: 0 0 40px -8px var(--primary);
   --game-bird: oklch(0.97 0.21 110);
   --game-dino: oklch(0.73 0.17 300);
@@ -154,9 +156,16 @@
 .console-title { color: var(--primary); font-size: 24px; font-weight: 700; text-align: center; }
 .handheld { width: 100%; max-width: 400px; border: 4px solid var(--primary); border-radius: 40px; background: var(--card); padding: 16px; box-shadow: var(--console-shadow); }
 .handheld-screen { overflow: hidden; border: 2px solid var(--border); border-radius: 16px; background: var(--background); }
-.handheld-controls { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding: 0 12px; color: var(--muted-foreground); font-size: 12px; }
-.handheld-dpad { text-align: center; line-height: 13px; }
-.handheld-buttons { color: var(--primary); font-size: 18px; }
+.handheld-controls { display: grid; grid-template-columns: 72px minmax(0, 1fr) 72px; align-items: center; gap: 8px; margin-top: 22px; padding: 0 4px 4px; color: var(--muted-foreground); font-size: 12px; }
+.console-touch-button { width: 72px; height: 72px; min-width: 0; padding: 0; border-radius: 50%; border: 2px solid var(--primary); background: var(--secondary); color: var(--primary); touch-action: none; user-select: none; animation: control-glow 2s ease-out infinite; }
+.console-touch-button svg { width: 26px; height: 26px; }
+.console-touch-button:active { background: var(--primary); color: var(--primary-foreground); }
+.console-touch-button:disabled { opacity: 0.65; }
+.console-center-controls { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; gap: 3px; }
+.console-game-status { min-height: 16px; font-size: 10px; font-weight: 700; color: var(--foreground); white-space: nowrap; }
+.console-menu-button { color: var(--muted-foreground); font-size: 11px; padding: 0 8px; }
+@keyframes control-glow { 0% { box-shadow: var(--control-glow); } 85%, 100% { box-shadow: var(--control-glow-faded); } }
+@media (prefers-reduced-motion: reduce) { .console-touch-button { animation: none; box-shadow: var(--control-glow-faded); } }
 .console-motto { font-size: 12px; color: var(--muted-foreground); }
 .game-menu { aspect-ratio: 3 / 4; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 20px; }
 .game-menu-item { min-height: 49px; height: auto; width: 100%; justify-content: space-between; padding: 12px; border-width: 2px; font-size: 13px; }

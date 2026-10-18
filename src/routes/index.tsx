@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ConsoleControls } from "@/components/console-controls";
 import { GAMES, type GameDef } from "@/games/engine";
 import { CH, CW, Grid, renderGrid, type Seg, type TermGame } from "@/games/term";
 
@@ -28,14 +29,10 @@ function Index() {
     <main className="console-page font-term">
       <h1 className="console-title">ZENITH GAMES</h1>
       <div className="handheld">
-        <div className="handheld-screen">
-          {def ? <Player key={def.id} def={def} onExit={() => setSelected(null)} /> : <Menu onPick={setSelected} />}
-        </div>
-        <div className="handheld-controls" aria-hidden="true">
-          <span className="handheld-dpad">▲<br />◀ ✚ ▶<br />▼</span>
-          <span className="handheld-select">▰ ▰</span>
-          <span className="handheld-buttons">● ● ●</span>
-        </div>
+        {def ? <Player key={def.id} def={def} onExit={() => setSelected(null)} /> : <>
+          <div className="handheld-screen"><Menu onPick={setSelected} /></div>
+          <ConsoleControls />
+        </>}
       </div>
       <p className="console-motto">Life is a game...</p>
     </main>
@@ -145,8 +142,32 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
     setOpts((o) => ({ ...o, [k]: v }));
   };
 
+  const controlTap = (side: -1 | 1) => {
+    const gm = game.current;
+    if (!gm) return;
+    if (phaseRef.current === "over" || gm.over) {
+      phaseRef.current = "play";
+      setPhase("play");
+      setRun((n) => n + 1);
+      return;
+    }
+    if (phaseRef.current === "setup") {
+      phaseRef.current = "play";
+      setPhase("play");
+      gm.start();
+    }
+    gm.tap(Math.floor(gm.W * (side < 0 ? 0.25 : 0.75)), side);
+  };
+  const controlDrag = (dx: number) => {
+    const gm = game.current;
+    const width = ref.current?.getBoundingClientRect().width;
+    if (!gm || !width || phaseRef.current !== "play" || gm.over) return;
+    gm.drag(dx * (gm.W + 2) / width);
+  };
+
   return (
-    <div className="game-player select-none">
+    <>
+    <div className="handheld-screen"><div className="game-player select-none">
       <div className={`game-player-title game-ink-${def.id}`}>{def.name}</div>
       <canvas
         ref={ref}
@@ -182,10 +203,8 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
           ))}
         </div>
       )}
-      <div className="mt-auto flex items-center gap-3 px-3 py-3 text-xs">
-        {phase === "over" && <span className="text-muted-foreground">GAME OVER</span>}
-        <Button variant="outline" size="sm" onClick={onExit}>◀ MENÜ</Button>
-      </div>
-    </div>
+    </div></div>
+    <ConsoleControls onTap={controlTap} onDrag={controlDrag} onMenu={onExit} over={phase === "over"} />
+    </>
   );
 }
