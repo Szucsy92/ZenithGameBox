@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep the handheld console presentation in the index route separate from the terminal game modules, so visual framing changes preserve game graphics and mechanics.
+- Keep touch-button pointer capture in the shared console controls and adapt pixel drags to game columns in the player, so both hands use the same game input methods.

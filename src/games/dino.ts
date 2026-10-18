@@ -10,7 +10,7 @@ export function dino({ best }: GameOpts): TermGame {
     delay() { return 16; },
     start() { this.started = true; vel = JUMP; },
     tap() { jump = true; },
-    drag() {},
+    drag(dx) { if (Math.abs(dx) >= 0.5) jump = true; },
     tick() {
       if (!this.started || this.over) return;
       if (jump) { if (dinoY >= GROUND) vel = JUMP; jump = false; }
@@ -32,7 +32,6 @@ export function dino({ best }: GameOpts): TermGame {
         for (let y = GROUND - cactusH + 1; y <= GROUND; y++) g.inner(cactusX - 1, y, "█▄█", "#00aa00");
       g.inner(DINO_X - 1, dinoY - 1, "▓▀█▀▓", "#af87ff");
       g.inner(DINO_X - 1, dinoY, "▓███▓", "#af5fff");
-      if (this.over) g.center(Math.floor(H / 2), " GAME OVER ", "#000000", W);
     },
     hud() {
       return [{ t: ` HI: ${Math.max(best, this.score)} | SCORE: ${this.score} | SPEED: ${Math.round(speed / 0.4 * 10) / 10} `, c: "#ffffff" }];

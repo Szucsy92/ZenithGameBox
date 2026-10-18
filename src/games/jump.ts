@@ -69,12 +69,10 @@ export function jump({ best, opts }: GameOpts): TermGame {
         g.inner(px - 3, H - 2, "▓███▓", player);
         return;
       }
-      if (this.over) { g.center(Math.floor(H / 2), " GAME OVER ", WHITE, W); }
       if (ground) g.inner(0, groundY, "█".repeat(W), GREEN);
       for (const p of pl) if (p.a) g.inner(p.x - 1, p.y, "█".repeat(10), p.max === -2 ? PURPLE : p.max !== -1 ? YELLOW : CYAN);
       g.inner(px - 3, py - 1, "▓▀█▀▓", player);
       g.inner(px - 3, py, "▓███▓", player);
-      if (this.over) g.center(Math.floor(H / 2), " GAME OVER ", WHITE, W);
     },
     hud() {
       return [{ t: ` BEST:${Math.max(best, Math.floor(this.score))} | SCORE:${Math.floor(this.score)}m | ZONE: ${Math.floor(this.score)}m`, c: HUD }];
