@@ -3,8 +3,8 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ConsoleControls({ onTap, onDrag, onMenu, over = false }: {
-  onTap?: (side: -1 | 1) => void;
-  onDrag?: (dx: number) => void;
+  onTap?: ((side: -1 | 1) => void) | undefined;
+  onDrag?: ((dx: number) => void) | undefined;
   onMenu?: () => void;
   over?: boolean;
 }) {
@@ -22,8 +22,8 @@ export function ConsoleControls({ onTap, onDrag, onMenu, over = false }: {
 
 function TouchControl({ side, onTap, onDrag }: {
   side: -1 | 1;
-  onTap?: (side: -1 | 1) => void;
-  onDrag?: (dx: number) => void;
+  onTap?: ((side: -1 | 1) => void) | undefined;
+  onDrag?: ((dx: number) => void) | undefined;
 }) {
   const pointer = useRef<{ id: number; x: number } | null>(null);
   const down = (e: PointerEvent<HTMLButtonElement>) => {

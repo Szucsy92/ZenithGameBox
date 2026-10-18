@@ -10,7 +10,7 @@ export function dino({ best }: GameOpts): TermGame {
     delay() { return 16; },
     start() { this.started = true; vel = JUMP; },
     tap() { jump = true; },
-    drag() {},
+    drag(dx) { if (Math.abs(dx) >= 0.5) jump = true; },
     tick() {
       if (!this.started || this.over) return;
       if (jump) { if (dinoY >= GROUND) vel = JUMP; jump = false; }

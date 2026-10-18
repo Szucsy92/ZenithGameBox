@@ -11,7 +11,7 @@ export function bird({ best }: GameOpts): TermGame {
     delay() { return 16; },
     start() { this.started = true; vel = FLAP; },
     tap() { flap = true; },
-    drag() {},
+    drag(dx) { if (Math.abs(dx) >= 0.5) flap = true; },
     tick() {
       if (!this.started || this.over) return;
       if (flap) { vel = FLAP; flap = false; }
