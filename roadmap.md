@@ -1,3 +1,5 @@
 - [ ] Smooth the physics of all five games while preserving original mechanics.
 - [ ] Apply minimal sub-cell graphical smoothing without changing the console.
 - [ ] Test movement, collisions, and touch gameplay.
+- [ ] Add two round tap/swipe controls with a two-second fading glow and centered menu/game-over status.
+- [ ] Make Pong slower and more forgiving.
