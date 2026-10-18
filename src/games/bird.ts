@@ -39,7 +39,6 @@ export function bird({ best }: GameOpts): TermGame {
       const b = BIRD_X - 1;
       if (vel < 0) { g.inner(b, birdY, "╣", YELLOW); g.inner(b + 1, birdY, "▼", RED); g.inner(b + 2, birdY, "╠", YELLOW); }
       else g.inner(b, birdY, vel > 0 ? "╣█╠" : "╣▓╠", YELLOW);
-      if (this.over) g.center(Math.floor(H / 2), "GAME OVER", WHITE, W);
     },
     hud() {
       return [{ t: " SCORE: ", c: WHITE }, { t: String(this.score), c: CYAN }, { t: "   BEST: ", c: WHITE }, { t: String(Math.max(best, this.score)), c: YELLOW }];
