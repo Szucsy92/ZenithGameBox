@@ -3,4 +3,4 @@
 - [x] Test movement, collisions, and touch gameplay.
 - [x] Add two round tap/swipe controls with a two-second fading glow and centered menu/game-over status.
 - [x] Make Pong slower and more forgiving.
-- [ ] Add a palette-matched app icon and launch-menu background, then verify menu and game entry.
+- [x] Add a palette-matched app icon and launch-menu background, then verify menu and game entry.
