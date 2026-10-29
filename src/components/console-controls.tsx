@@ -83,7 +83,6 @@ function TouchControl({ side, onTap, onDrag }: {
         className={`console-knob${knob.active ? " is-active" : ""}${flash ? " is-flash" : ""}`}
         style={{ transform: `translate(${knob.x.toFixed(2)}px, ${knob.y.toFixed(2)}px) ${jelly}` }}
       />
-      <span aria-hidden="true" className="console-tether" style={{ width: `${(dist + 15).toFixed(2)}px`, transform: dir }} />
       <span aria-hidden="true" className="console-rim-light" style={{ transform: `${dir} translateX(30px)` }} />
     </Button>
   );
