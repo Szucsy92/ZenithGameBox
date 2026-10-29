@@ -59,7 +59,7 @@ function TouchControl({ side, onTap, onDrag }: {
   const pull = dist / REACH;
   const angle = dist > 0.4 ? (Math.atan2(knob.y, knob.x) * 180) / Math.PI : 0;
   const dir = `rotate(${angle.toFixed(2)}deg)`;
-  const jelly = `rotate(${angle.toFixed(2)}deg) scale(${(1 + 0.16 * pull).toFixed(3)}, ${(1 - 0.12 * pull).toFixed(3)}) rotate(${(-angle).toFixed(2)}deg)`;
+  const jelly = `rotate(${angle.toFixed(2)}deg) scale(${(1 + 0.13 * pull).toFixed(3)}, ${(1 - 0.10 * pull).toFixed(3)}) rotate(${(-angle).toFixed(2)}deg)`;
   return (
     <Button
       variant="outline"
