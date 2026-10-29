@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent } from "react";
+import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { Button } from "@/components/ui/button";
 
 export function ConsoleControls({ onTap, onDrag, onMenu, over = false }: {
@@ -19,7 +19,7 @@ export function ConsoleControls({ onTap, onDrag, onMenu, over = false }: {
   );
 }
 
-const REACH = 20;
+const REACH = 17;
 
 function TouchControl({ side, onTap, onDrag }: {
   side: -1 | 1;
@@ -43,10 +43,11 @@ function TouchControl({ side, onTap, onDrag }: {
     if (!active || active.id !== e.pointerId) return;
     onDrag?.(e.clientX - active.x);
     active.x = e.clientX;
-    let x = e.clientX - active.sx, y = (e.clientY ?? active.sy) - active.sy;
+    const x = e.clientX - active.sx;
+    const y = (e.clientY ?? active.sy) - active.sy;
     const d = Math.hypot(x, y);
-    if (d > REACH) { x = (x / d) * REACH; y = (y / d) * REACH; }
-    setKnob({ x, y, active: true });
+    const k = d > REACH ? REACH / d : 1;
+    setKnob({ x: x * k, y: y * k, active: true });
   };
   const release = (e: PointerEvent<HTMLButtonElement>) => {
     if (pointer.current?.id === e.pointerId) {
@@ -54,10 +55,16 @@ function TouchControl({ side, onTap, onDrag }: {
       setKnob({ x: 0, y: 0, active: false });
     }
   };
+  const dist = Math.min(REACH, Math.hypot(knob.x, knob.y));
+  const pull = dist / REACH;
+  const angle = dist > 0.4 ? (Math.atan2(knob.y, knob.x) * 180) / Math.PI : 0;
+  const dir = `rotate(${angle.toFixed(2)}deg)`;
+  const jelly = `rotate(${angle.toFixed(2)}deg) scale(${(1 + 0.16 * pull).toFixed(3)}, ${(1 - 0.12 * pull).toFixed(3)}) rotate(${(-angle).toFixed(2)}deg)`;
   return (
     <Button
       variant="outline"
       className="console-touch-button"
+      style={{ "--pull": pull.toFixed(3) } as CSSProperties}
       aria-label={side < 0 ? "Bal érintőgomb" : "Jobb érintőgomb"}
       title={side < 0 ? "Bal érintőgomb" : "Jobb érintőgomb"}
       disabled={!onTap}
@@ -68,11 +75,15 @@ function TouchControl({ side, onTap, onDrag }: {
       onLostPointerCapture={release}
       onClick={(e) => { if (e.detail === 0) onTap?.(side); }}
     >
+      <span aria-hidden="true" className="console-reach" />
+      <span aria-hidden="true" className="console-pull" style={{ transform: dir }} />
+      <span aria-hidden="true" className="console-tether" style={{ width: `${dist.toFixed(2)}px`, transform: dir }} />
+      <span aria-hidden="true" className="console-rim-light" style={{ transform: `${dir} translateX(28px)` }} />
       <span
         key={flash}
         aria-hidden="true"
         className={`console-knob${knob.active ? " is-active" : ""}${flash ? " is-flash" : ""}`}
-        style={{ transform: `translate(${knob.x}px, ${knob.y}px)` }}
+        style={{ transform: `translate(${knob.x.toFixed(2)}px, ${knob.y.toFixed(2)}px) ${jelly}` }}
       />
     </Button>
   );
