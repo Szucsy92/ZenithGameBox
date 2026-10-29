@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useRef, useState, type PointerEvent } from "react";
 import { Button } from "@/components/ui/button";
 
 export function ConsoleControls({ onTap, onDrag, onMenu, over = false }: {
