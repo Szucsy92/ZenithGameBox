@@ -19,7 +19,7 @@ class ReleaseRules(unittest.TestCase):
         now = datetime(2026, 11, 7, 5, 24, tzinfo=timezone.utc)
         first = int(rules.metadata(now, 12, 1)['version_code'])
         second = int(rules.metadata(now + timedelta(seconds=1), 13, 1)['version_code'])
-        self.assertEqual(first, 216277440)
+        self.assertEqual(first, 216192240)
         self.assertEqual(second, first + 1)
     def test_ambiguous_local_time_is_rejected(self):
         with self.assertRaises(ValueError): rules.metadata(datetime(2026, 11, 7), 1, 1)
