@@ -6,6 +6,10 @@ This project was built with [Lovable](https://lovable.dev).
 
 **Live app**: https://window-wiggle-arcade.lovable.app
 
+## Android APK
+
+**Actions → Aláírt Android APK → Run workflow** készíti a dátumozott kiadást, amely a **Releases** oldalról tölthető le. Első használat előtt a tartós aláírókulcsot és a szükséges GitHub-titkokat be kell állítani; részletes útmutató: [Android APK](android/README.md). A csomag a közzétett konzolt nyitja meg, internetkapcsolattal.
+
 ## Build with Lovable
 
 Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5362cf0f-56bd-4bec-94d5-9d0666d6f058).

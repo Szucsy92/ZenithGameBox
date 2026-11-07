@@ -66,6 +66,10 @@
   --control-glow: 0 0 22px 3px var(--primary);
   --control-glow-faded: 0 0 4px 0 var(--border);
   --console-shadow: 0 0 40px -8px var(--primary);
+  --native-safe-top: 0px;
+  --native-safe-right: 0px;
+  --native-safe-bottom: 0px;
+  --native-safe-left: 0px;
   --game-bird: oklch(0.97 0.21 110);
   --game-dino: oklch(0.73 0.17 300);
   --game-pong: oklch(0.7 0.21 45);
@@ -152,7 +156,7 @@
   }
 }
 
-.console-page { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px 16px; }
+.console-page { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: max(24px, env(safe-area-inset-top, 0px), var(--native-safe-top)) max(16px, env(safe-area-inset-right, 0px), var(--native-safe-right)) max(24px, env(safe-area-inset-bottom, 0px), var(--native-safe-bottom)) max(16px, env(safe-area-inset-left, 0px), var(--native-safe-left)); }
 .console-title { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--primary); font-size: 24px; font-weight: 700; text-align: center; }
 .console-title img { width: 36px; height: 36px; object-fit: contain; image-rendering: pixelated; }
 .handheld { width: 100%; max-width: 400px; border: 4px solid var(--primary); border-radius: 40px; background: var(--card); padding: 16px; box-shadow: var(--console-shadow); }
@@ -181,7 +185,7 @@
 .game-player { min-height: 100%; aspect-ratio: 3 / 4; display: flex; flex-direction: column; }
 .game-player-title { font-size: 12px; padding: 12px; }
 @media (max-width: 380px) {
-  .console-page { gap: 16px; padding: 16px 12px; }
+  .console-page { gap: 16px; padding: max(16px, env(safe-area-inset-top, 0px), var(--native-safe-top)) max(12px, env(safe-area-inset-right, 0px), var(--native-safe-right)) max(16px, env(safe-area-inset-bottom, 0px), var(--native-safe-bottom)) max(12px, env(safe-area-inset-left, 0px), var(--native-safe-left)); }
   .handheld { padding: 12px; }
   .game-menu { padding: 14px; }
 }
