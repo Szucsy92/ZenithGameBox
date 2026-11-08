@@ -4,7 +4,8 @@
 - [x] Add two round tap/swipe controls with a two-second fading glow and centered menu/game-over status.
 - [x] Make Pong slower and more forgiving.
 - [x] Add a palette-matched app icon and launch-menu background, then verify menu and game entry.
-- [ ] Extend the console background under transparent Android system bars while keeping controls safe.
-- [ ] Create a palette-matched Android launch screen without a square icon background.
-- [ ] Add manual signed APK creation with dated GitHub Releases and setup instructions.
-- [ ] Verify browser gameplay, Android packaging configuration, and release rules.
+- [x] Extend the console background under transparent Android system bars while keeping controls safe.
+- [x] Create a palette-matched Android launch screen without a square icon background.
+- [x] Add manual signed APK creation with dated GitHub Releases and setup instructions.
+- [x] Verify browser gameplay, Android XML/workflow configuration, and release identity tests.
+- [ ] Run the first signed APK release and verify system bars, launch and upgrade on Android — blocked on the five GitHub signing secrets and a GitHub workflow run; no Android SDK or signing key is available here.
