@@ -27,10 +27,26 @@ jobs:
         uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4
         with:
           gradle-version: '8.13'
-      - name: Android eszközök
-        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
-      - name: Android SDK
-        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - name: Android SDK (előtelepített, automatikus licencelfogadással)
+        run: |
+          set -euo pipefail
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses > /dev/null || true
+          yes | "$SDKM" --install 'platforms;android-36' 'build-tools;35.0.0' > /dev/null
+      - name: Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Offline játékkonzol becsomagolása
+        env:
+          ZENITH_OFFLINE: '1'
+        run: |
+          set -euo pipefail
+          bun install --frozen-lockfile || bun install
+          bunx vite build
+          test -f dist/client/index.html
+          rm -rf android/app/src/main/assets/web
+          mkdir -p android/app/src/main/assets
+          cp -r dist/client android/app/src/main/assets/web
+          rm -f android/app/src/main/assets/web/_headers
       - name: Kiadási szabályok ellenőrzése
         run: python3 scripts/test_android_release.py
       - name: Indítókép és színek
@@ -96,8 +112,7 @@ jobs:
           Aláírt Zenith GameBox Android-kiadás.
           Készítés (UTC): $VERSION
           Forrás: $BUILT_SHA
-          Az APK a https://window-wiggle-arcade.lovable.app/ konzolt nyitja meg; internetkapcsolatot igényel.
-          A webes játék frissítése az APK újratelepítése nélkül is megjelenik.
+          A teljes játékkonzol a telefonra települ, internet nélkül is működik.
           Android 7.0 vagy újabb rendszer és naprakész Android System WebView szükséges.
           NOTES
           gh release create "$TAG" "$RUNNER_TEMP/release/$APK_NAME" "$RUNNER_TEMP/release/$APK_NAME.sha256" --draft --target "$BUILT_SHA" --title "Zenith GameBox – $VERSION (UTC)" --notes-file "$RUNNER_TEMP/release-notes.md"

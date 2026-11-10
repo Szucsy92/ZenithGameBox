@@ -24,7 +24,8 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends ComponentActivity {
-    private static final String HOME = "https://window-wiggle-arcade.lovable.app/";
+    private static final String HOST = "appassets.androidplatform.net";
+    private static final String HOME = "https://" + HOST + "/";
     private WebView web;
     private LinearLayout error;
     private Insets safe = Insets.NONE;
@@ -59,7 +60,7 @@ public class MainActivity extends ComponentActivity {
         error.setGravity(android.view.Gravity.CENTER);
         error.setBackgroundColor(background);
         TextView message = new TextView(this);
-        message.setText("A konzol megnyitásához internetkapcsolat szükséges.");
+        message.setText("A konzol nem tudott elindulni.");
         message.setTextColor(Color.WHITE);
         message.setGravity(android.view.Gravity.CENTER);
         Button retry = new Button(this);
@@ -77,10 +78,23 @@ public class MainActivity extends ComponentActivity {
             return insets;
         });
         web.setWebViewClient(new WebViewClient() {
+            @Override public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Uri uri = request.getUrl();
+                if (!HOST.equals(uri.getHost())) return null;
+                String path = uri.getPath() == null ? "/" : uri.getPath();
+                if (path.contains("..")) return null;
+                String file = path.equals("/") || path.isEmpty() ? "index.html" : path.substring(1);
+                try {
+                    return new android.webkit.WebResourceResponse(mime(file), null, getAssets().open("web/" + file));
+                } catch (java.io.IOException missing) {
+                    try { return new android.webkit.WebResourceResponse("text/html", "utf-8", getAssets().open("web/index.html")); }
+                    catch (java.io.IOException ignored) { return null; }
+                }
+            }
             @Override public void onPageFinished(WebView view, String url) { applySafeArea(); }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
-                if ("https".equals(uri.getScheme()) && "window-wiggle-arcade.lovable.app".equals(uri.getHost()) && (uri.getPort() == -1 || uri.getPort() == 443)) return false;
+                if ("https".equals(uri.getScheme()) && HOST.equals(uri.getHost())) return false;
                 if (("https".equals(uri.getScheme()) || "http".equals(uri.getScheme())) && request.isForMainFrame()) {
                     try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); } catch (android.content.ActivityNotFoundException ignored) { }
                 }
@@ -100,6 +114,17 @@ public class MainActivity extends ComponentActivity {
         });
         web.loadUrl(HOME);
         ViewCompat.requestApplyInsets(root);
+    }
+    private static String mime(String f) {
+        if (f.endsWith(".html")) return "text/html";
+        if (f.endsWith(".js") || f.endsWith(".mjs")) return "text/javascript";
+        if (f.endsWith(".css")) return "text/css";
+        if (f.endsWith(".png")) return "image/png";
+        if (f.endsWith(".jpg") || f.endsWith(".jpeg")) return "image/jpeg";
+        if (f.endsWith(".svg")) return "image/svg+xml";
+        if (f.endsWith(".woff2")) return "font/woff2";
+        if (f.endsWith(".json")) return "application/json";
+        return "application/octet-stream";
     }
     private void applySafeArea() {
         if (web == null) return;

@@ -26,14 +26,18 @@ const optKey = (id: string, k: string) => `zenith_${id}_${k}`;
 
 function Index() {
   const [selected, setSelected] = useState<number | null>(null);
+  const [cursor, setCursor] = useState(0);
   const def = selected === null ? undefined : GAMES[selected];
   return (
     <main className="console-page font-term">
       <h1 className="console-title"><img src={consoleIcon} alt="" width={36} height={36} />ZENITH GAMES</h1>
       <div className="handheld">
         {def ? <Player key={def.id} def={def} onExit={() => setSelected(null)} /> : <>
-          <div className="handheld-screen"><Menu onPick={setSelected} /></div>
-          <ConsoleControls />
+          <div className="handheld-screen"><Menu onPick={setSelected} cursor={cursor} onHover={setCursor} /></div>
+          <ConsoleControls
+            onStick={(_dx, dy) => { if (dy) setCursor((c) => (c + dy + GAMES.length) % GAMES.length); }}
+            onPress={() => setSelected(cursor)}
+          />
         </>}
       </div>
       <p className="console-motto">Life is a game...</p>
@@ -41,7 +45,9 @@ function Index() {
   );
 }
 
-function Menu({ onPick }: { onPick: (i: number) => void }) {
+function Menu({ onPick, cursor, onHover }: { onPick: (i: number) => void; cursor: number; onHover: (i: number) => void }) {
+  const items = useRef<(HTMLButtonElement | null)[]>([]);
+  useEffect(() => { items.current[cursor]?.scrollIntoView({ block: "nearest" }); }, [cursor]);
   const [best, setBest] = useState<Record<string, number>>({});
   useEffect(() => {
     const b: Record<string, number> = {};
@@ -52,7 +58,15 @@ function Menu({ onPick }: { onPick: (i: number) => void }) {
     <div className="game-menu">
       <img className="game-menu-artwork" src={startArtwork} alt="" width={768} height={1024} aria-hidden="true" />
       {GAMES.map((g, i) => (
-        <Button key={g.id} variant="outline" onClick={() => onPick(i)} className={`game-menu-item game-ink-${g.id}`}>
+        <Button
+          key={g.id}
+          ref={(el) => { items.current[i] = el; }}
+          variant="outline"
+          aria-current={i === cursor ? "true" : undefined}
+          onPointerEnter={() => onHover(i)}
+          onClick={() => onPick(i)}
+          className={`game-menu-item game-ink-${g.id}${i === cursor ? " is-selected" : ""}`}
+        >
           <span>{i + 1}) {g.name.replace("ZENITH ", "")}</span>
           <span className="game-best">BEST {best[g.id] ?? 0}</span>
         </Button>
@@ -130,7 +144,10 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
     if (phase === "setup") { setPhase("play"); gm.start(); return; }
     const { col, side } = colOf(e);
     lastX.current = col;
-    gm.tap(Math.floor(col), side);
+    if (gm.tapAt) {
+      const r = e.currentTarget.getBoundingClientRect();
+      gm.tapAt(Math.floor(col), Math.floor(((e.clientY - r.top) / r.height) * (gm.H + 2)));
+    } else gm.tap(Math.floor(col), side);
   };
   const move = (e: React.PointerEvent) => {
     if (phase !== "play" || lastX.current === null) return;
@@ -207,7 +224,14 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
         </div>
       )}
     </div></div>
-    <ConsoleControls onTap={controlTap} onDrag={controlDrag} onMenu={onExit} over={phase === "over"} />
+    <ConsoleControls
+      onTap={controlTap}
+      onDrag={controlDrag}
+      onStick={(dx, dy) => { const gm = game.current; if (gm?.dir && phaseRef.current === "play" && !gm.over) gm.dir(dx, dy); }}
+      onPress={() => { const gm = game.current; if (gm?.press && phaseRef.current === "play" && !gm.over) gm.press(); }}
+      onMenu={onExit}
+      over={phase === "over"}
+    />
     </>
   );
 }
