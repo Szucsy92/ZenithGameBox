@@ -146,7 +146,7 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
     lastX.current = col;
     if (gm.tapAt) {
       const r = e.currentTarget.getBoundingClientRect();
-      gm.tapAt(Math.floor(col) + 1, Math.floor(((e.clientY - r.top) / r.height) * (gm.H + 2)));
+      gm.tapAt(Math.floor(col), Math.floor(((e.clientY - r.top) / r.height) * (gm.H + 2)));
     } else gm.tap(Math.floor(col), side);
   };
   const move = (e: React.PointerEvent) => {
