@@ -34,7 +34,7 @@ jobs:
           yes | "$SDKM" --licenses > /dev/null || true
           yes | "$SDKM" --install 'platforms;android-36' 'build-tools;35.0.0' > /dev/null
       - name: Bun
-        uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2
+        uses: oven-sh/setup-bun@v2
       - name: Offline játékkonzol becsomagolása
         env:
           ZENITH_OFFLINE: '1'
