@@ -8,4 +8,7 @@
 - [x] Create a palette-matched Android launch screen without a square icon background.
 - [x] Add manual signed APK creation with dated GitHub Releases and setup instructions.
 - [x] Verify browser gameplay, Android XML/workflow configuration, and release identity tests.
-- [ ] Run the first signed APK release and verify system bars, launch and upgrade on Android — blocked on the five GitHub signing secrets and a GitHub workflow run; no Android SDK or signing key is available here.
+- [ ] Run the first signed APK release and verify system bars, launch and upgrade on Android — blocked on the five GitHub signing secrets and a GitHub workflow run; no Android SDK or signing key is available here.- [x] Snake (6.) and Memory 4x4 (7.) games with joystick control
+- [x] Joystick menu navigation with purple glow
+- [x] Offline APK (console bundled into the app)
+- [x] Fix APK build stalling at Android SDK step
