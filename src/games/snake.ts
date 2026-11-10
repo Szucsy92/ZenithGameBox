@@ -16,9 +16,7 @@ export function snake({ best }: GameOpts): TermGame & { dir(dx: number, dy: numb
     delay() { return Math.max(70, 160 - this.score * 4); },
     start() { this.started = true; },
     dir(x, y) { turn(x, y); },
-    tap(_c, side) { // relative turn: left / right
-      if (side < 0) turn(dy, -dx); else turn(-dy, dx);
-    },
+    tap() {},
     drag() {},
     tick() {
       if (!this.started || this.over) return;

@@ -228,6 +228,7 @@ function Player({ def, onExit }: { def: GameDef; onExit: () => void }) {
       onTap={controlTap}
       onDrag={controlDrag}
       onStick={(dx, dy) => { const gm = game.current; if (gm?.dir && phaseRef.current === "play" && !gm.over) gm.dir(dx, dy); }}
+      onPress={() => { const gm = game.current; if (gm?.press && phaseRef.current === "play" && !gm.over) gm.press(); }}
       onMenu={onExit}
       over={phase === "over"}
     />

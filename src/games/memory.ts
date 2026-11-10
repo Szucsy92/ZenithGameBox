@@ -5,7 +5,7 @@ const SYMBOLS = ["▲", "●", "♥", "♦", "♣", "♠", "★", "◆"];
 const COLORS = ["#00ffff", "#ffff00", "#ff3355", "#55ff55", "#ff5f00", "#5fd7ff", "#ffd7ff", "#af87ff"];
 const CW = 12, CHH = 4; // card cell size
 
-export function memory({ best }: GameOpts): TermGame & { dir(dx: number, dy: number): void; tapAt(col: number, row: number): void } {
+export function memory({ best }: GameOpts): TermGame & { dir(dx: number, dy: number): void; press(): void; tapAt(col: number, row: number): void } {
   const W = 4 * (CW + 2) + 2, H = 4 * (CHH + 1) - 1;
   const deck = [...SYMBOLS.keys(), ...SYMBOLS.keys()];
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j]!, deck[i]!]; }
@@ -29,7 +29,8 @@ export function memory({ best }: GameOpts): TermGame & { dir(dx: number, dy: num
     delay: () => 16,
     start() { this.started = true; },
     dir(dx, dy) { cur = ((Math.floor(cur / 4) + dy + 4) % 4) * 4 + ((cur % 4) + dx + 4) % 4; },
-    tap() { flip(this, cur); },
+    tap() {},
+    press() { flip(this, cur); },
     tapAt(col, row) {
       const c = Math.floor((col - 1) / (CW + 2)), r = Math.floor((row - 1) / (CHH + 1));
       if (c >= 0 && c < 4 && r >= 0 && r < 4) { cur = r * 4 + c; flip(this, cur); }

@@ -132,6 +132,8 @@ export interface TermGame {
   drag(dxCols: number): void;
   /** Optional four-way joystick step (-1/0/1 each). */
   dir?(dx: number, dy: number): void;
+  /** Optional joystick press (tap released without pushing). */
+  press?(): void;
   /** Optional direct tap on grid cell (inner col, row). */
   tapAt?(col: number, row: number): void;
 }
