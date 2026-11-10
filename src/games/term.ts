@@ -130,6 +130,10 @@ export interface TermGame {
   tap(col: number, side: -1 | 1): void;
   /** Drag: horizontal movement in columns since the last event. */
   drag(dxCols: number): void;
+  /** Optional four-way joystick step (-1/0/1 each). */
+  dir?(dx: number, dy: number): void;
+  /** Optional direct tap on grid cell (inner col, row). */
+  tapAt?(col: number, row: number): void;
 }
 
 export type GameOpts = { best: number; opts: Record<string, string> };

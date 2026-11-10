@@ -3,6 +3,8 @@ import { dino } from "./dino";
 import { pong, PONG_BALLS, PONG_PADS } from "./pong";
 import { space, SPACE_BULLETS, SPACE_SHIPS } from "./space";
 import { jump, JUMP_SKINS } from "./jump";
+import { snake } from "./snake";
+import { memory } from "./memory";
 import type { GameOpts, TermGame } from "./term";
 
 export type OptChoice = { value: string; label: string; color?: string };
@@ -37,4 +39,6 @@ export const GAMES: GameDef[] = [
     id: "jump", name: "ZENITH JUMP", color: "#55ff55", make: jump,
     options: [{ key: "skin", label: "Block Skin", choices: JUMP_SKINS.map((c, i) => ({ value: String(i + 1), label: "██", color: c })) }],
   },
+  { id: "snake", name: "ZENITH SNAKE", color: "#55ff55", make: snake, options: [] },
+  { id: "memory", name: "ZENITH MEMORY", color: "#d787ff", make: memory, options: [] },
 ];
