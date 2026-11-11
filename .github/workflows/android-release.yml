@@ -27,12 +27,16 @@ jobs:
         uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4
         with:
           gradle-version: '8.13'
-      - name: Android SDK (előtelepített, automatikus licencelfogadással)
+      - name: Android licencek elfogadása
         run: |
           set -euo pipefail
           SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKM" --licenses > /dev/null || true
-          yes | "$SDKM" --install 'platforms;android-36' 'build-tools;35.0.0' > /dev/null
+      - name: Android eszközök ellenőrzése
+        run: |
+          set -euo pipefail
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          "$SDKM" --install 'platforms;android-36' 'build-tools;36.0.0'
       - name: Bun
         uses: oven-sh/setup-bun@v2
       - name: Offline játékkonzol becsomagolása
@@ -91,7 +95,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/release"
           cp android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/release/$APK_NAME"
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$RUNNER_TEMP/release/$APK_NAME" > "$RUNNER_TEMP/signature.txt"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$RUNNER_TEMP/release/$APK_NAME" > "$RUNNER_TEMP/signature.txt"
           actual=$(awk '/Signer #1 certificate SHA-256 digest:/ {print $NF}' "$RUNNER_TEMP/signature.txt" | tr '[:upper:]' '[:lower:]')
           expected=$(printf '%s' "$CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')
           if [ "$actual" != "$expected" ]; then
