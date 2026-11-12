@@ -46,10 +46,26 @@ jobs:
           set -euo pipefail
           bun install --frozen-lockfile || bun install
           bunx vite build
-          test -f dist/client/index.html
+          # A nitro a buildet .output/public-ba (nem dist/client-be) írja.
+          # Megkeressük a mappát, ahol az index.html vagy a _shell.html van.
+          echo "--- build után ---"
+          ls -la . .output .output/public dist 2>/dev/null || true
+          FILE=$(find .output dist -type f \( -name index.html -o -name _shell.html \) 2>/dev/null | grep -v node_modules | sort | head -1 || true)
+          if [ -z "$FILE" ]; then
+            echo "::error::Nem található index.html/_shell.html a build után"
+            find .output dist -maxdepth 3 2>/dev/null | head -80 || true
+            exit 1
+          fi
+          OUT=$(dirname "$FILE")
+          echo "Build kimenet: $OUT (talált fájl: $FILE)"
           rm -rf android/app/src/main/assets/web
           mkdir -p android/app/src/main/assets
-          cp -r dist/client android/app/src/main/assets/web
+          cp -r "$OUT" android/app/src/main/assets/web
+          # SPA-módban a belépési fájl lehet _shell.html: legyen belőle index.html
+          if [ ! -f android/app/src/main/assets/web/index.html ]; then
+            cp android/app/src/main/assets/web/_shell.html android/app/src/main/assets/web/index.html
+          fi
+          test -s android/app/src/main/assets/web/index.html
           rm -f android/app/src/main/assets/web/_headers
       - name: Kiadási szabályok ellenőrzése
         run: python3 scripts/test_android_release.py
