@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { Button } from "@/components/ui/button";
 
 type Handlers = {
@@ -10,26 +10,39 @@ type Handlers = {
   onPress?: (() => void) | undefined;
 };
 
-export function ConsoleControls({ onMenu, over = false, ...h }: Handlers & {
+export function ConsoleControls({ onMenu, over = false, repeat = false, ...h }: Handlers & {
   onMenu?: () => void;
+  /** Keep stepping while the knob is held out in a direction. */
+  repeat?: boolean;
   over?: boolean;
 }) {
   return (
     <div className="handheld-controls">
-      <TouchControl side={-1} {...h} />
+      <TouchControl side={-1} repeat={repeat} {...h} />
       <div className="console-center-controls">
         <span className="console-game-status" role="status">{over ? "GAME OVER" : ""}</span>
         <Button variant="ghost" size="sm" onClick={onMenu} disabled={!onMenu} className="console-menu-button">MENÜ</Button>
       </div>
-      <TouchControl side={1} {...h} />
+      <TouchControl side={1} repeat={repeat} {...h} />
     </div>
   );
 }
 
-const REACH = 16;
-const STEP = 10; // knob pixels needed to count as a direction push
+const REACH = 22;
+const STEP = 12; // knob pixels needed to count as a direction push
 
-function TouchControl({ side, onTap, onDrag, onStick, onPress }: Handlers & { side: -1 | 1 }) {
+function TouchControl({ side, onTap, onDrag, onStick, onPress, repeat }: Handlers & { side: -1 | 1; repeat: boolean }) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stick = useRef(onStick);
+  stick.current = onStick;
+  const stopRepeat = () => { if (timer.current) clearTimeout(timer.current); timer.current = null; };
+  useEffect(() => stopRepeat, []);
+  const startRepeat = (dx: number, dy: number) => {
+    stopRepeat();
+    if (!repeat) return;
+    const step = (wait: number) => { timer.current = setTimeout(() => { stick.current?.(dx, dy); step(160); }, wait); };
+    step(380);
+  };
   const pointer = useRef<{ id: number; x: number; sx: number; sy: number; dir: string; max: number } | null>(null);
   const [knob, setKnob] = useState({ x: 0, y: 0, active: false });
   const down = (e: PointerEvent<HTMLButtonElement>) => {
@@ -56,7 +69,13 @@ function TouchControl({ side, onTap, onDrag, onStick, onPress }: Handlers & { si
       if (d >= STEP) dir = Math.abs(x) > Math.abs(y) ? (x > 0 ? "R" : "L") : (y > 0 ? "D" : "U");
       else if (d < STEP / 2) dir = "";
       else dir = active.dir;
-      if (dir && dir !== active.dir) onStick(dir === "R" ? 1 : dir === "L" ? -1 : 0, dir === "D" ? 1 : dir === "U" ? -1 : 0);
+      if (dir !== active.dir) {
+        if (dir) {
+          const dx = dir === "R" ? 1 : dir === "L" ? -1 : 0, dy = dir === "D" ? 1 : dir === "U" ? -1 : 0;
+          onStick(dx, dy);
+          startRepeat(dx, dy);
+        } else stopRepeat();
+      }
       active.dir = dir;
     }
   };
@@ -64,6 +83,7 @@ function TouchControl({ side, onTap, onDrag, onStick, onPress }: Handlers & { si
     const active = pointer.current;
     if (active?.id === e.pointerId) {
       pointer.current = null;
+      stopRepeat();
       setKnob({ x: 0, y: 0, active: false });
       if (e.type === "pointerup" && active.max < STEP) onPress?.();
     }

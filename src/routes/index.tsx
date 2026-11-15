@@ -37,6 +37,7 @@ function Index() {
           <ConsoleControls
             onStick={(_dx, dy) => { if (dy) setCursor((c) => (c + dy + GAMES.length) % GAMES.length); }}
             onPress={() => setSelected(cursor)}
+            repeat
           />
         </>}
       </div>
