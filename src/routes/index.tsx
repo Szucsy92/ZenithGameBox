@@ -48,6 +48,7 @@ function Index() {
 
 function Menu({ onPick, cursor, onHover }: { onPick: (i: number) => void; cursor: number; onHover: (i: number) => void }) {
   const items = useRef<(HTMLButtonElement | null)[]>([]);
+  const drag = useRef<{ id: number; y: number; moved: boolean } | null>(null);
   useEffect(() => { items.current[cursor]?.scrollIntoView({ block: "nearest" }); }, [cursor]);
   const [best, setBest] = useState<Record<string, number>>({});
   useEffect(() => {
@@ -55,14 +56,47 @@ function Menu({ onPick, cursor, onHover }: { onPick: (i: number) => void; cursor
     GAMES.forEach((g) => (b[g.id] = Number(localStorage.getItem(hsKey(g.id)) || 0)));
     setBest(b);
   }, []);
+  const idxAt = (x: number, y: number) => {
+    const el = document.elementFromPoint(x, y)?.closest?.("[data-menu-idx]");
+    return el === null || el === undefined ? null : Number(el.getAttribute("data-menu-idx"));
+  };
+  const down = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { id: e.pointerId, y: e.clientY, moved: false };
+    const i = idxAt(e.clientX, e.clientY);
+    if (i !== null) onHover(i);
+  };
+  const move = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId) return;
+    if (Math.abs(e.clientY - d.y) > 12) d.moved = true;
+    const i = idxAt(e.clientX, e.clientY);
+    if (i !== null) onHover(i);
+  };
+  const up = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId) return;
+    drag.current = null;
+    if (!d.moved) {
+      const i = idxAt(e.clientX, e.clientY);
+      if (i !== null) onPick(i);
+    }
+  };
   return (
-    <div className="game-menu">
+    <div
+      className="game-menu touch-none"
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
+    >
       <img className="game-menu-artwork" src={startArtwork} alt="" width={768} height={1024} aria-hidden="true" />
       {GAMES.map((g, i) => (
         <Button
           key={g.id}
           ref={(el) => { items.current[i] = el; }}
           variant="outline"
+          data-menu-idx={i}
           aria-current={i === cursor ? "true" : undefined}
           onPointerEnter={() => onHover(i)}
           onClick={() => onPick(i)}
