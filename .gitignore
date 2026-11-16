@@ -30,3 +30,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Android / Gradle
+.gradle/
+build/
+local.properties
+*.keystore
+*.jks

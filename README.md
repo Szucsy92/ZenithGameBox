@@ -1,30 +1,26 @@
-# Zenith Gamebox
+# Zenith GameBox
 
-A csatolt zenith_games.sh fájlban lévő kódot szeretném egy ablakban játszható húzás és tappolás alapú játékkonzolra megépíteni.
+Retro játékkonzol hét játékkal (Bird, Dino, Pong, Space, Jump, Snake, Memory), érintéssel és húzással. Teljesen natív, internet nélkül is játszható.
 
-This project was built with [Lovable](https://lovable.dev).
+## Hivatalos alkalmazás
 
-**Live app**: https://window-wiggle-arcade.lovable.app
+Az Android és iOS kiadások kizárólag a natív forrásokból készülnek:
+- Android: `native/android` — Kotlin + Jetpack Compose
+- iOS: `native/ios` — SwiftUI
 
-## Android APK
+A `.github/workflows/native-build.yml` az egyetlen hivatalos build- és release-folyamat. Minden kiadás Release konfigurációval készül; debug APK nem készül. Androidon a GitHub Actions az `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` és `ANDROID_KEY_PASSWORD` titkokkal aláírt APK-t állít elő; kulcs nélkül aláíratlan Release APK készül. Az iOS IPA aláíratlan; telepítéshez Apple fejlesztői aláírás és provisioning szükséges.
 
-**Actions → Aláírt Android APK → Run workflow** készíti a dátumozott kiadást, amely a **Releases** oldalról tölthető le. Első használat előtt a tartós aláírókulcsot és a szükséges GitHub-titkokat be kell állítani; részletes útmutató: [Android APK](android/README.md). A csomag a közzétett konzolt nyitja meg, internetkapcsolattal.
+Egyszeri aláírókulcs-készítéshez: **Actions → Aláírókulcs készítése (egyszeri)** (lásd a fájl elején a szükséges titkokat). Ha a korábbi (WebView-s) APK kulcsa megvan, a meglévő titkokat használd tovább: az alkalmazásazonosító (`hu.zenith.gamebox`) és a verziókód-séma változatlan, így az új APK a régire frissítésként települ.
 
-## Build with Lovable
+## Offline működés
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5362cf0f-56bd-4bec-94d5-9d0666d6f058).
+Minden játék, kép és beállítás az alkalmazásban van. A hálózat kizárólag az opcionális frissítés-ellenőrzéshez kell (Android); internet nélkül ez csendben kimarad.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Frissítés az alkalmazásból (OTA, Android)
 
-## Development
+Indításkor az app megnézi a GitHub legfrissebb kiadását (`releases/latest`). A kiadás címkéje `native-<dátum>-<verziókód>`, a végén lévő szám az APK `versionCode`-ja (a 2020-01-01 óta eltelt másodpercek, mint a korábbi kiadásoknál). Ha újabb, megjelenik az „Új frissítés elérhető” ablak: **Később** vagy **Letöltés**. A Letöltés az APK-t az appon belül letölti, majd elindítja a telepítést (a rendszer egyszer az „ismeretlen forrásból telepítés” engedélyt és a telepítés jóváhagyását kéri). Feltételek: a repó nyilvános legyen, és a kiadások ugyanazzal a kulccsal legyenek aláírva. A repó nevét a CI a `GITHUB_REPOSITORY` változóból adja a buildnek. iOS-en az app nem tud önmagát telepíteni, ott nincs ilyen ablak.
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Fejlesztés
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+- Android Studio: nyisd meg a `native/android` mappát.
+- Xcode 16+: nyisd meg a `native/ios/ZenithGameBox.xcodeproj` projektet (iOS 17+).

@@ -1,0 +1,176 @@
+name: Natív build – Zenith GameBox (Android APK és iOS IPA)
+
+# A native/android (Kotlin + Compose) és a native/ios (SwiftUI) forrásokból épít.
+# Ez az egyetlen hivatalos build- és release-folyamat Androidra és iOS-re.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "native/**"
+      - ".github/workflows/native-build.yml"
+  pull_request:
+    paths:
+      - "native/**"
+      - ".github/workflows/native-build.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stamp:
+    runs-on: ubuntu-latest
+    outputs:
+      stamp: ${{ steps.s.outputs.stamp }}
+      version: ${{ steps.s.outputs.version }}
+      code: ${{ steps.s.outputs.code }}
+      run: ${{ steps.s.outputs.run }}
+    steps:
+      - id: s
+        run: |
+          echo "stamp=$(TZ=Europe/Budapest date +%Y-%m-%d_%H%M)" >> "$GITHUB_OUTPUT"
+          echo "version=$(TZ=Europe/Budapest date +%Y.%m.%d-%H%M)" >> "$GITHUB_OUTPUT"
+          # A korábbi kiadásokkal azonos verziókód: a 2020-01-01 óta eltelt másodpercek (így az új APK a régire is frissít).
+          echo "code=$(( $(date -u +%s) - 1577836800 ))" >> "$GITHUB_OUTPUT"
+          echo "run=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+  android:
+    needs: stamp
+    runs-on: ubuntu-latest
+    env:
+      APP_VERSION_NAME: ${{ needs.stamp.outputs.version }}
+      APP_VERSION_CODE: ${{ needs.stamp.outputs.code }}
+      BUILD_STAMP: ${{ needs.stamp.outputs.stamp }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Forráshiba-ellenőrzés (literális \n a kódban)
+        run: |
+          if grep -rnF '\n' --include=*.kt --include=*.swift native | grep -vE '"[^"]*\\n[^"]*"'; then
+            echo "::error::Literális \\n szekvencia a forrásban (sortörés helyett)."; exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Nincs gradlew a repóban, ezért a Gradle-t az action telepíti (AGP 8.9.2 ≥ Gradle 8.11.1).
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+
+      - name: Aláírókulcs előkészítése (ha van)
+        id: ks
+        env:
+          KS_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -n "$KS_BASE64" ] && [ -n "$KS_PASSWORD" ]; then
+            KS_FILE="$RUNNER_TEMP/zenith.keystore"
+            printf '%s' "$KS_BASE64" | base64 -d > "$KS_FILE"
+            chmod 600 "$KS_FILE"
+            echo "ANDROID_KEYSTORE_FILE=$KS_FILE" >> "$GITHUB_ENV"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Nincs Android aláírókulcs – aláíratlan Release APK készül, debug build nélkül."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Natív Android release APK
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          gradle -p native/android assembleRelease --no-daemon
+          APK=$(find native/android/app/build/outputs/apk/release -name '*.apk' | head -n1)
+          test -n "$APK"
+          mkdir -p out
+          cp "$APK" "out/zenith-gamebox-native-${BUILD_STAMP}.apk"
+          if [ -n "${ANDROID_KEYSTORE_FILE:-}" ]; then
+            APKSIGNER=$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools" -name apksigner | sort -V | tail -n1)
+            "$APKSIGNER" verify --verbose "out/zenith-gamebox-native-${BUILD_STAMP}.apk"
+          else
+            echo "::notice::A release APK aláíratlan; nincs debug build."
+          fi
+
+      - name: Kulcs törlése a futtatóról
+        if: always()
+        run: rm -f "$RUNNER_TEMP/zenith.keystore"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-android-apk
+          path: out/*.apk
+          if-no-files-found: error
+
+  ios:
+    needs: stamp
+    runs-on: macos-15
+    # Az iOS-build hibája nem akadályozza az Android-kiadást.
+    continue-on-error: true
+    env:
+      APP_VERSION_NAME: ${{ needs.stamp.outputs.version }}
+      APP_VERSION_CODE: ${{ needs.stamp.outputs.code }}
+      BUILD_STAMP: ${{ needs.stamp.outputs.stamp }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode verzió
+        run: xcodebuild -version
+
+      - name: Aláíratlan IPA készítése
+        working-directory: native/ios
+        run: |
+          set -euo pipefail
+          # Apple marketing version: csak számok (pl. 2026.11.9)
+          MARKETING=$(echo "$APP_VERSION_NAME" | cut -c1-10 | awk -F. '{printf "%d.%d.%d", $1, $2, $3}')
+          SYMROOT="$RUNNER_TEMP/ios-build"
+          xcodebuild -project ZenithGameBox.xcodeproj -target ZenithGameBox \
+            -configuration Release -sdk iphoneos \
+            SYMROOT="$SYMROOT" \
+            MARKETING_VERSION="$MARKETING" CURRENT_PROJECT_VERSION="${{ needs.stamp.outputs.run }}" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build > "$RUNNER_TEMP/xcode.log" 2>&1 || { tail -n 120 "$RUNNER_TEMP/xcode.log"; exit 1; }
+          APP="$SYMROOT/Release-iphoneos/ZenithGameBox.app"
+          test -d "$APP"
+          mkdir -p "$RUNNER_TEMP/ipa/Payload" "$GITHUB_WORKSPACE/out"
+          cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/"
+          (cd "$RUNNER_TEMP/ipa" && zip -qry "$GITHUB_WORKSPACE/out/zenith-gamebox-native-${BUILD_STAMP}.ipa" Payload)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-ios-ipa
+          path: out/*.ipa
+          if-no-files-found: error
+
+  release:
+    # Csak kézi indításnál vagy main-re pusholáskor, ha az Android-build sikeres (az iOS IPA akkor kerül mellé, ha az is elkészült).
+    if: ${{ always() && needs.android.result == 'success' && github.event_name != 'pull_request' }}
+    needs: [stamp, android, ios]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          # A címke végi szám az APK versionCode-ja: az alkalmazáson belüli frissítés ezzel hasonlít.
+          tag_name: native-${{ needs.stamp.outputs.stamp }}-${{ needs.stamp.outputs.code }}
+          name: Natív build ${{ needs.stamp.outputs.version }}
+          prerelease: false
+          make_latest: true
+          body: |
+            Zenith GameBox natív (Kotlin/SwiftUI) build · ${{ needs.stamp.outputs.version }}
+            Android: natív Release APK (kulcs esetén aláírt, különben aláíratlan; debug build nincs). iOS: natív Release IPA aláíratlan – telepítés előtt Apple-aláírás szükséges.
+          files: out/*
