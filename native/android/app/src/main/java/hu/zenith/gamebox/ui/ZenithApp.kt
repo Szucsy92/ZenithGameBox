@@ -53,6 +53,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
@@ -65,7 +66,7 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -147,7 +148,7 @@ private fun ConsolePage(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Image(
-                    painter = painterResource(R.drawable.zenith_icon),
+                    bitmap = ImageBitmap.imageResource(R.drawable.zenith_icon),
                     contentDescription = null,
                     modifier = Modifier.size(36.dp),
                     filterQuality = FilterQuality.None,
@@ -277,7 +278,7 @@ private fun GameMenu(cursor: Int, best: List<Int>, onHover: (Int) -> Unit, onPic
             else if (bottom > scroll.value + viewportPx) scroll.animateScrollTo((bottom + padPx - viewportPx).toInt())
         }
         Image(
-            painter = painterResource(R.drawable.zenith_start),
+            bitmap = ImageBitmap.imageResource(R.drawable.zenith_start),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
